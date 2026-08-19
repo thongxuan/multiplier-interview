@@ -1,0 +1,113 @@
+{
+  "info": {
+    "name": "Bulk Employee Import",
+    "description": "Upload a CSV, poll the import status, inspect what the mock employee service received.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "mockUrl", "value": "http://localhost:4000" },
+    { "key": "importId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Reset mock employee service",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{mockUrl}}/employees", "host": ["{{mockUrl}}"], "path": ["employees"] }
+      }
+    },
+    {
+      "name": "2. Upload CSV",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('accepted', () => pm.response.to.have.status(202));",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('importId', body.importId);",
+              "console.log('importId', body.importId, 'accepted', body.accepted, 'rejected', body.rejected);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": { "raw": "{{baseUrl}}/imports", "host": ["{{baseUrl}}"], "path": ["imports"] },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "fixtures/employees-200.csv",
+              "description": "generate with: npm run gen:csv -- 200 fixtures/employees-200.csv"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Poll import status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('ok', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "console.log(b.status, JSON.stringify(b.counts));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/imports/{{importId}}/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["imports", "{{importId}}", "status"]
+        }
+      }
+    },
+    {
+      "name": "4. List employees created by the mock",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{mockUrl}}/employees", "host": ["{{mockUrl}}"], "path": ["employees"] }
+      }
+    },
+    {
+      "name": "5. Upload a file with a bad header (expect 400)",
+      "request": {
+        "method": "POST",
+        "url": { "raw": "{{baseUrl}}/imports", "host": ["{{baseUrl}}"], "path": ["imports"] },
+        "body": {
+          "mode": "formdata",
+          "formdata": [{ "key": "file", "type": "file", "src": "fixtures/bad-header.csv" }]
+        }
+      }
+    },
+    {
+      "name": "6. Status of an unknown import (expect 404)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/imports/66c1f0a3e4b0a1c2d3e4f5a6/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["imports", "66c1f0a3e4b0a1c2d3e4f5a6", "status"]
+        }
+      }
+    },
+    {
+      "name": "7. Health",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+      }
+    }
+  ]
+}

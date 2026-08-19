@@ -93,7 +93,7 @@ export class MongooseImportRepository implements ImportRepository {
       },
       failures: failedDocs.map((d) => ({
         line: d.line,
-        email: d.payload.email === '' ? null : d.payload.email,
+        email: d.payload?.email ? d.payload.email : null,
         reason: d.reason as FailureReason,
         detail: d.detail ?? '',
       })),
@@ -146,10 +146,10 @@ export class MongooseImportRepository implements ImportRepository {
       line: r.line,
       attempts: r.attempts,
       payload: {
-        name: r.payload.name,
-        email: r.payload.email,
-        startDate: r.payload.startDate,
-        country: r.payload.country,
+        name: r.payload?.name ?? '',
+        email: r.payload?.email ?? '',
+        startDate: r.payload?.startDate ?? '',
+        country: r.payload?.country ?? '',
       },
     }))
   }
