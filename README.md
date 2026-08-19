@@ -8,13 +8,18 @@ connection open.
 - **Spec:** `docs/superpowers/specs/2026-08-19-bulk-employee-import-design.md`
 - **Plan:** `docs/superpowers/plans/2026-08-19-bulk-employee-import.md`
 
+## Result
+
+- import API: ![import API result](docs/results/import.png)
+- status API: ![status API result](docs/results/status.png)
+
 ## Running it
 
 Needs MongoDB on `localhost:27017`.
 
 ```bash
 npm install
-npm run mock     # terminal 1 — stand-in employee service on :4000
+npm run mock     # terminal 1 — stand-in employee service on :8888
 npm start        # terminal 2 — this service on :3000
 ```
 
