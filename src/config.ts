@@ -32,7 +32,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     port: num(env, 'PORT', 3000),
     mongoUri: str(env, 'MONGODB_URI', 'mongodb://localhost:27017'),
     mongoDb: str(env, 'MONGODB_DB', 'bulk_import'),
-    employeeServiceUrl: str(env, 'EMPLOYEE_SERVICE_URL', 'http://localhost:4000'),
+    employeeServiceUrl: str(env, 'EMPLOYEE_SERVICE_URL', 'http://localhost:8888'),
     cronSchedule: str(env, 'CRON_SCHEDULE', '*/10 * * * * *'),
     batchSize: num(env, 'BATCH_SIZE', 50),
     upstreamConcurrency: num(env, 'UPSTREAM_CONCURRENCY', 5),

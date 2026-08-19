@@ -6,28 +6,17 @@ import { randomUUID } from 'node:crypto'
  * Deliberately dependency-free relative to the rest of the application: it must be
  * possible to believe this is a different service written by a different team.
  *
- * Deterministic behaviours, so a Postman run can demonstrate every failure path:
- *   local part starts with "flaky" -> 503 twice, then succeeds
- *   local part starts with "boom"  -> 503 always
- *   local part starts with "slow"  -> succeeds after 2s
- *   unsupported country            -> 400
- *   repeated Idempotency-Key       -> 200 with the original employee, nothing created
+ * Deterministic behaviours, driven by the email local part, so a Postman run can
+ * demonstrate every failure path:
+ *   "reject..." -> 400 always      (row lands UPSTREAM_REJECTED, never retried)
+ *   "boom..."   -> 503 always      (row exhausts MAX_ATTEMPTS -> UPSTREAM_UNAVAILABLE)
+ *   "flaky..."  -> 503 twice, then succeeds  (retry recovers it)
+ *   "slow..."   -> succeeds after 2s         (exercises the concurrency pool)
+ *   repeated Idempotency-Key -> 200 with the original employee, nothing created
+ *
+ * Country is deliberately NOT validated: this mock accepts whatever the customer's
+ * spreadsheet says, in whatever form.
  */
-
-const SUPPORTED_COUNTRIES = new Set([
-  'SG',
-  'VN',
-  'US',
-  'IN',
-  'GB',
-  'DE',
-  'AU',
-  'PH',
-  'ID',
-  'MY',
-  'JP',
-  'NL',
-])
 
 const REQUIRED_FIELDS = ['name', 'email', 'startDate', 'country'] as const
 
@@ -90,6 +79,10 @@ export async function buildMockEmployeeService(): Promise<FastifyInstance> {
 
     const localPart = employee.email.split('@')[0]?.toLowerCase() ?? ''
 
+    if (localPart.startsWith('reject')) {
+      return reply.code(400).send({ message: 'employee rejected (mock: reject)' })
+    }
+
     if (localPart.startsWith('boom')) {
       return reply.code(503).send({ message: 'service unavailable (mock: boom)' })
     }
@@ -103,10 +96,6 @@ export async function buildMockEmployeeService(): Promise<FastifyInstance> {
     }
 
     if (localPart.startsWith('slow')) await sleep(2000)
-
-    if (!SUPPORTED_COUNTRIES.has(employee.country.toUpperCase())) {
-      return reply.code(400).send({ message: `country '${employee.country}' is not supported` })
-    }
 
     const created: Employee = {
       id: randomUUID(),
@@ -129,7 +118,7 @@ export async function buildMockEmployeeService(): Promise<FastifyInstance> {
 const isDirectRun =
   process.argv[1] !== undefined && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))
 if (isDirectRun) {
-  const port = Number(process.env.MOCK_PORT ?? 4000)
+  const port = Number(process.env.MOCK_PORT ?? 8888)
   const app = await buildMockEmployeeService()
   await app.listen({ port, host: '0.0.0.0' })
   console.log(`[mock employee service] listening on http://localhost:${port}`)

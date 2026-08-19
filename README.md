@@ -25,11 +25,11 @@ npm run gen:csv -- 200 fixtures/employees-200.csv
 
 curl -s -X POST http://localhost:3000/imports -F file=@fixtures/employees-200.csv | jq
 curl -s http://localhost:3000/imports/<importId>/status | jq
-curl -s http://localhost:4000/employees | jq '.employees | length'
+curl -s http://localhost:8888/employees | jq '.employees | length'
 ```
 
 The generated file deliberately includes broken rows so a run exercises every failure
-path: a bad date, a duplicate email, a missing field, an unsupported country, and
+path: a bad date, a duplicate email, a missing field, a `reject` email the upstream refuses, and
 `flaky` emails that make the mock return `503` twice before succeeding.
 
 `postman/bulk-import.postman_collection.json` walks the same flow.

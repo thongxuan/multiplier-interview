@@ -6,7 +6,7 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:3000" },
-    { "key": "mockUrl", "value": "http://localhost:4000" },
+    { "key": "mockUrl", "value": "http://localhost:8888" },
     { "key": "importId", "value": "" }
   ],
   "item": [

@@ -4,7 +4,7 @@
  *   npm run gen:csv -- 200 fixtures/employees-200.csv
  *
  * Every tenth row is deliberately broken so a run exercises the failure paths:
- * a bad date, a duplicate email, a missing field, an unsupported country,
+ * a bad date, a duplicate email, a missing field, a rejected email,
  * and emails that trigger the mock's flaky behaviour.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -28,7 +28,7 @@ for (let i = 0; i < count; i++) {
       lines.push(`No Country ${n},nocountry${n}@x.com,01/03/2026,`)
       break
     case 8:
-      lines.push(`Bad Country ${n},badcountry${n}@x.com,01/03/2026,ZZ`)
+      lines.push(`Rejected ${n},reject${n}@x.com,01/03/2026,France`)
       break
     case 9:
       lines.push(`Flaky ${n},flaky${n}@x.com,01/03/2026,VN`)

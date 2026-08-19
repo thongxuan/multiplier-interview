@@ -43,10 +43,15 @@ describe('mock employee service', () => {
     expect(res.json().message).toContain('country')
   })
 
-  it('rejects an unsupported country with 400', async () => {
-    const res = await create({ ...alice, country: 'XX' })
+  it('accepts any country, in code or name form', async () => {
+    expect((await create({ ...alice, country: 'France' })).statusCode).toBe(201)
+    expect((await create({ ...alice, email: 'b@x.com', country: 'FR' })).statusCode).toBe(201)
+  })
+
+  it('rejects a "reject" email with 400', async () => {
+    const res = await create({ ...alice, email: 'reject1@x.com' })
     expect(res.statusCode).toBe(400)
-    expect(res.json().message).toContain('XX')
+    expect(res.json().message).toContain('reject')
   })
 
   it('returns the original employee for a repeated idempotency key without creating a second', async () => {

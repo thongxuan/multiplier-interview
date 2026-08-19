@@ -73,7 +73,7 @@ describe('end to end, in process', () => {
 
   it('reports COMPLETED_WITH_ERRORS when the upstream rejects a row', async () => {
     const { importId } = (
-      await upload(`${HEADER}\nA,a@x.com,01/03/2026,SG\nB,b@x.com,02/03/2026,ZZ\n`)
+      await upload(`${HEADER}\nA,a@x.com,01/03/2026,SG\nB,reject1@x.com,02/03/2026,France\n`)
     ).json()
 
     await runner().runBatch()
@@ -83,7 +83,7 @@ describe('end to end, in process', () => {
     expect(body.counts.succeeded).toBe(1)
     expect(body.counts.failed).toBe(1)
     expect(body.failures[0]).toMatchObject({ line: 3, reason: 'UPSTREAM_REJECTED' })
-    expect(body.failures[0].detail).toContain('ZZ')
+    expect(body.failures[0].detail).toContain('400')
   })
 
   it('exhausts attempts on a permanently failing row', async () => {

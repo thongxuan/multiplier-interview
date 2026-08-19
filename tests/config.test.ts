@@ -7,7 +7,7 @@ describe('loadConfig', () => {
     expect(c.port).toBe(3000)
     expect(c.mongoUri).toBe('mongodb://localhost:27017')
     expect(c.mongoDb).toBe('bulk_import')
-    expect(c.employeeServiceUrl).toBe('http://localhost:4000')
+    expect(c.employeeServiceUrl).toBe('http://localhost:8888')
     expect(c.cronSchedule).toBe('*/10 * * * * *')
     expect(c.batchSize).toBe(50)
     expect(c.upstreamConcurrency).toBe(5)
